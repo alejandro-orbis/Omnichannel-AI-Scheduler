@@ -49,6 +49,7 @@ Omnichannel appointment management system for aesthetic clinics. Patients can in
 
 ## 🏗️ Architecture
 
+```
 Webhook (WhatsApp / Instagram / Facebook)
 │
 └── Parse Webhook (normalizes formats)
@@ -80,8 +81,7 @@ Webhook (WhatsApp / Instagram / Facebook)
 ├── Update Metrics (leads, appointments, escalations)
 │
 └── Sync GHL (contact, opportunity, note)
-
-text
+```
 
 ---
 
@@ -136,6 +136,7 @@ text
 
 ## 📁 Project Structure
 
+```
 omnichannel-ai-scheduler/
 ├── README.md
 ├── LICENSE
@@ -158,7 +159,7 @@ omnichannel-ai-scheduler/
     ├── ghl/
     ├── email/
     └── n8n/
-
+```
 ---
 
 ## 🚀 Setup Guide
