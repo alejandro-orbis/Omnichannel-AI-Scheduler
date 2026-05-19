@@ -1,6 +1,6 @@
-# 🏥 Omnichannel AI Scheduler — Aesthetic Clinic
+# 🏥 Omnichannel AI Scheduler — Clínica Estética
 
-> AI-powered omnichannel appointment scheduling system for aesthetic clinics. Built with n8n, Gemini AI, WhatsApp Business API, Instagram DM, Facebook Messenger, Google Calendar and Google Sheets. Automates bookings, cancellations, rescheduling and human escalation without manual intervention.
+> Sistema omnicanal de gestión de citas con IA para clínicas de estética. Construido con n8n, Gemini AI, WhatsApp Business API, Instagram DM, Facebook Messenger, Google Calendar y Google Sheets. Automatiza reservas, cancelaciones, reprogramaciones y escalado humano sin intervención manual.
 
 [![N8N](https://img.shields.io/badge/N8N-Workflow-orange?style=flat-square)](https://n8n.io)
 [![Gemini AI](https://img.shields.io/badge/Gemini-AI-4285F4?style=flat-square&logo=google)](https://ai.google.dev)
@@ -8,21 +8,143 @@
 [![Instagram](https://img.shields.io/badge/Instagram-DM-E4405F?style=flat-square&logo=instagram)](https://developers.facebook.com/docs/instagram)
 [![Facebook](https://img.shields.io/badge/Facebook-Messenger-1877F2?style=flat-square&logo=facebook)](https://developers.facebook.com/docs/messenger-platform)
 [![GoHighLevel](https://img.shields.io/badge/GoHighLevel-CRM-8A2BE2?style=flat-square)](https://www.gohighlevel.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-22c55e?style=flat-square)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Production_Ready-22c55e?style=flat-square)](https://github.com/alejandro-orbis)
+[![Licencia: MIT](https://img.shields.io/badge/Licencia-MIT-22c55e?style=flat-square)](LICENSE)
+[![Estado](https://img.shields.io/badge/Estado-Producción-22c55e?style=flat-square)](https://github.com/alejandro-orbis)
 
 ---
 
-## 📚 Documentation
+## 📚 Documentación
 
-| Language | File |
-|----------|------|
-| English | [README.md](README.md) |
-| Spanish | [README.ES.md](README.ES.md) |
+| Idioma | Archivo |
+|--------|---------|
+| Inglés | [README.md](README.md) |
+| Español | [README.ES.md](README.ES.md) |
 
 ---
 
-## 📁 Project Structure
+## 🎯 ¿Qué hace?
+
+Sistema omnicanal de gestión de citas para clínicas de estética. Los pacientes pueden interactuar a través de **WhatsApp, Instagram o Facebook Messenger** para:
+
+| Función | Descripción |
+|---------|-------------|
+| **Agendar cita** | El paciente solicita una cita, el bot recopila datos (nombre, teléfono, edad) y muestra disponibilidad real del Google Calendar |
+| **Confirmar cita** | Tras elegir horario, el paciente confirma y el bot crea el evento en el calendario |
+| **Reprogramar cita** | El paciente puede cambiar su cita a otro horario disponible |
+| **Cancelar cita** | El paciente cancela su cita existente |
+| **Escalado a humano** | Si el paciente necesita hablar con una persona, el bot deriva al staff y se silencia automáticamente |
+| **Triaje médico** | Verifica edad y condiciones de salud antes de agendar |
+| **Reset de conversación** | El usuario puede escribir `reset` para limpiar todo el contexto |
+
+---
+
+## ✨ Características principales
+
+| Característica | Descripción |
+|----------------|-------------|
+| **Omnicanal real** | WhatsApp Business API, Instagram DM, Facebook Messenger |
+| **IA conversacional multi-turno** | Contexto persistente entre sesiones usando caché + Google Sheets |
+| **Máquina de estados** | 9 etapas (inicio, triaje, recopilando_nombre, recopilando_telefono, mostrando_slots, confirmando_cita, agendado, cancelado, escalar) |
+| **Disponibilidad real** | Consulta Google Calendar en tiempo real, muestra huecos libres |
+| **Protección anti-doble confirmación** | Evita duplicados si el usuario responde "sí" varias veces |
+| **Triaje médico** | Verifica edad (≥18) y condiciones (embarazo, anticoagulantes, alergias) |
+| **Intervención humana** | Silencia el bot durante 30 minutos cuando un humano toma control |
+| **Reset completo** | Comando `reset` limpia caché y contexto en Sheets |
+| **Lead scoring** | Puntúa cada lead según intención (HOT 70-100, WARM 40-69, COOL 15-39, COLD 0-14) |
+| **Rate limiting** | 8 mensajes por minuto por conversación |
+| **Filtrado de eco** | Previene bucles con mensajes propios del bot |
+
+---
+
+## 🏗️ Arquitectura
+
+Webhook (WhatsApp / Instagram / Facebook)
+│
+└── Parsear Webhook (normaliza formatos)
+│
+└── Rate Limiter (8 msg/minuto)
+│
+└── Resolver Identidad Cross-Canal (patient_id + conversation_id únicos)
+│
+└── Intervencion Activa IF (human_takeover = TRUE silencia el bot)
+│
+└── Motor Estado Multi-turno
+│
+├── AGENDAR → Consultar disponibilidad Calendar → Crear evento
+│
+├── CANCELAR → Cancelar evento Calendar
+│
+├── CAMBIAR → Mostrar nuevos slots → Reprogramar
+│
+├── ESCALAR → Activar human_takeover + Email al staff
+│
+└── RESPONDER → Gemini IA clasifica intención
+│
+└── Preparar Respuesta → Guardar contexto
+│
+├── Enviar mensaje (WhatsApp / Instagram / Facebook)
+│
+├── Guardar en Sheets (Contexto, Pacientes, CRM_Inbox)
+│
+├── Actualizar Metrics (leads, citas, escalados)
+│
+└── Sincronizar GHL (contacto, oportunidad, nota)
+
+text
+
+---
+
+## 🧠 Etapas del Motor de Estado
+
+| Etapa | Descripción | Siguiente si ✅ | Siguiente si ❌ |
+|-------|-------------|-----------------|-----------------|
+| **inicio** | Clasifica intención con Gemini | `AGENDAR` → `triaje` | `OTRO` → responde y espera |
+| **triaje** | Pregunta edad, detecta contraindicaciones | Edad ≥18 → `recopilando_nombre` | Contraindicación → `escalar` |
+| **recopilando_nombre** | Pide nombre completo | Nombre válido → `recopilando_telefono` | No es nombre → repite |
+| **recopilando_telefono** | Pide teléfono, normaliza a 34XXXXXXXXX | Teléfono válido → `mostrando_slots` | No válido → repite |
+| **mostrando_slots** | Muestra hasta 6 huecos libres del Calendar | Elige número → `confirmando_cita` | "cambiar" → otros slots |
+| **confirmando_cita** | Resumen + "¿Confirmas? SÍ/NO" | "SÍ" → `agendado` | "NO" → `mostrando_slots` |
+| **agendado** | Crea evento en Calendar + notifica | "cancelar" → `confirmando_cancelacion` | "gracias" → despedida |
+| **confirmando_cancelacion** | "¿Confirmas cancelación? SÍ/NO" | "SÍ" → `cancelado` | "NO" → `agendado` |
+| **cancelado** | Elimina evento, limpia metadatos | Nueva cita → `mostrando_slots` | Despedida → `inicio` |
+| **escalar** | Deriva a atención humana | Email al staff, bot silenciado 30min | Staff resuelve → `inicio` |
+
+---
+
+## 🛠️ Stack tecnológico
+
+| Herramienta | Uso |
+|-------------|-----|
+| [N8N](https://n8n.io) | Orquestación de flujos y automatización |
+| [Gemini AI](https://ai.google.dev) | Clasificación de intención |
+| [WhatsApp Business API](https://developers.facebook.com/docs/whatsapp) | Mensajería entrante y saliente |
+| [Instagram DM API](https://developers.facebook.com/docs/instagram) | Mensajería por Instagram |
+| [Facebook Messenger API](https://developers.facebook.com/docs/messenger-platform) | Mensajería por Facebook |
+| [Google Calendar](https://calendar.google.com) | Gestión de citas y disponibilidad |
+| [Google Sheets](https://sheets.google.com) | Persistencia de contexto, pacientes, CRM y métricas |
+| [Gmail](https://gmail.com) | Notificaciones al staff |
+| [GoHighLevel / LeadConnector](https://gohighlevel.com) | CRM externo |
+
+---
+
+## 📸 Capturas de pantalla
+
+| Vista general del workflow | Dashboard de métricas | Ejemplo WhatsApp | Ejemplo Instagram |
+|---|---|---|---|
+| ![Overview](assets/n8n/workflow_overview.png) | ![Dashboard](assets/dashboard/dashboard_overview.png) | ![WhatsApp](assets/conversations/conversation_example_whatsapp.png) | ![Instagram](assets/conversations/conversation_example_instagram.png) |
+
+| Ejemplo Facebook | Email de confirmación | GHL Contactos | GHL Oportunidades |
+|---|---|---|---|
+| ![Facebook](assets/conversations/conversation_example_facebook.png) | ![Email](assets/email/email_confirmation.png) | ![GHL Contact](assets/ghl/ghl_contact_in_ghl.png) | ![GHL Opportunity](assets/ghl/ghl_opportunity_in_ghl.png) |
+
+| Google Sheets Contexto | Google Calendar Evento | Nodo Gemini IA | Nodos GHL en n8n |
+|---|---|---|---|
+| ![Contexto](assets/google_sheets/google_sheets_contexto.png) | ![Calendar](assets/google_calendar/google_calendar_appointment.png) | ![Gemini](assets/n8n/n8n_gemini_node.png) | ![GHL Nodes](assets/ghl/ghl_workflow_nodes.png) |
+
+---
+
+## 📁 Estructura del proyecto
+
 Webhook (WhatsApp / Instagram / Facebook)
 │
 └── Parsear Webhook (normaliza formatos)
