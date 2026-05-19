@@ -1,6 +1,6 @@
 # 🏥 Omnichannel AI Scheduler — Clínica Estética
 
-> Sistema omnicanal de gestión de citas con IA para clínicas de estética. Construido con n8n, Gemini AI, WhatsApp Business API, Instagram DM, Facebook Messenger, Google Calendar y Google Sheets. Automatiza reservas, cancelaciones, reprogramaciones y escalado humano sin intervención manual.
+> Sistema omnicanal de gestión de citas con IA para clínicas de estética. Construido con n8n, Gemini AI, WhatsApp Business API, Instagram DM, Facebook Messenger, Google Calendar, Google Sheets, Gmail y **GoHighLevel (LeadConnector)**. Automatiza reservas, cancelaciones, reprogramaciones y escalado humano sin intervención manual.
 
 [![N8N](https://img.shields.io/badge/N8N-Workflow-orange?style=flat-square)](https://n8n.io)
 [![Gemini AI](https://img.shields.io/badge/Gemini-AI-4285F4?style=flat-square&logo=google)](https://ai.google.dev)
@@ -58,6 +58,7 @@ Sistema omnicanal de gestión de citas para clínicas de estética. Los paciente
 
 ## 🏗️ Arquitectura
 
+```
 Webhook (WhatsApp / Instagram / Facebook)
 │
 └── Parsear Webhook (normaliza formatos)
@@ -89,9 +90,7 @@ Webhook (WhatsApp / Instagram / Facebook)
 ├── Actualizar Metrics (leads, citas, escalados)
 │
 └── Sincronizar GHL (contacto, oportunidad, nota)
-
-text
-
+```
 ---
 
 ## 🧠 Etapas del Motor de Estado
@@ -145,6 +144,7 @@ text
 
 ## 📁 Estructura del proyecto
 
+```
 Webhook (WhatsApp / Instagram / Facebook)
 │
 └── Parsear Webhook (normaliza formatos)
@@ -176,86 +176,7 @@ Webhook (WhatsApp / Instagram / Facebook)
 ├── Actualizar Metrics (leads, citas, escalados)
 │
 └── Sincronizar GHL (contacto, oportunidad, nota)
-
-text
-
----
-
-## 🧠 Etapas del Motor de Estado
-
-| Etapa | Descripción | Siguiente si ✅ | Siguiente si ❌ |
-|-------|-------------|-----------------|-----------------|
-| **inicio** | Clasifica intención con Gemini | `AGENDAR` → `triaje` | `OTRO` → responde y espera |
-| **triaje** | Pregunta edad, detecta contraindicaciones | Edad ≥18 → `recopilando_nombre` | Contraindicación → `escalar` |
-| **recopilando_nombre** | Pide nombre completo | Nombre válido → `recopilando_telefono` | No es nombre → repite |
-| **recopilando_telefono** | Pide teléfono, normaliza a 34XXXXXXXXX | Teléfono válido → `mostrando_slots` | No válido → repite |
-| **mostrando_slots** | Muestra hasta 6 huecos libres del Calendar | Elige número → `confirmando_cita` | "cambiar" → otros slots |
-| **confirmando_cita** | Resumen + "¿Confirmas? SÍ/NO" | "SÍ" → `agendado` | "NO" → `mostrando_slots` |
-| **agendado** | Crea evento en Calendar + notifica | "cancelar" → `confirmando_cancelacion` | "gracias" → despedida |
-| **confirmando_cancelacion** | "¿Confirmas cancelación? SÍ/NO" | "SÍ" → `cancelado` | "NO" → `agendado` |
-| **cancelado** | Elimina evento, limpia metadatos | Nueva cita → `mostrando_slots` | Despedida → `inicio` |
-| **escalar** | Deriva a atención humana | Email al staff, bot silenciado 30min | Staff resuelve → `inicio` |
-
----
-
-## 🛠️ Stack tecnológico
-
-| Herramienta | Uso |
-|-------------|-----|
-| [N8N](https://n8n.io) | Orquestación de flujos y automatización |
-| [Gemini AI](https://ai.google.dev) | Clasificación de intención |
-| [WhatsApp Business API](https://developers.facebook.com/docs/whatsapp) | Mensajería entrante y saliente |
-| [Instagram DM API](https://developers.facebook.com/docs/instagram) | Mensajería por Instagram |
-| [Facebook Messenger API](https://developers.facebook.com/docs/messenger-platform) | Mensajería por Facebook |
-| [Google Calendar](https://calendar.google.com) | Gestión de citas y disponibilidad |
-| [Google Sheets](https://sheets.google.com) | Persistencia de contexto, pacientes, CRM y métricas |
-| [Gmail](https://gmail.com) | Notificaciones al staff |
-| [GoHighLevel / LeadConnector](https://gohighlevel.com) | CRM externo |
-
----
-
-## 📸 Capturas de pantalla
-
-| Vista general del workflow | Dashboard de métricas | Ejemplo WhatsApp | Ejemplo Instagram |
-|---|---|---|---|
-| ![Overview](assets/n8n/workflow_overview.png) | ![Dashboard](assets/dashboard/dashboard_overview.png) | ![WhatsApp](assets/conversations/conversation_example_whatsapp.png) | ![Instagram](assets/conversations/conversation_example_instagram.png) |
-
-| Ejemplo Facebook | Email de confirmación | GHL Contactos | GHL Oportunidades |
-|---|---|---|---|
-| ![Facebook](assets/conversations/conversation_example_facebook.png) | ![Email](assets/email/email_confirmation.png) | ![GHL Contact](assets/ghl/ghl_contact_in_ghl.png) | ![GHL Opportunity](assets/ghl/ghl_opportunity_in_ghl.png) |
-
-| Google Sheets Contexto | Google Calendar Evento | Nodo Gemini IA | Nodos GHL en n8n |
-|---|---|---|---|
-| ![Contexto](assets/google_sheets/google_sheets_contexto.png) | ![Calendar](assets/google_calendar/google_calendar_appointment.png) | ![Gemini](assets/n8n/n8n_gemini_node.png) | ![GHL Nodes](assets/ghl/ghl_workflow_nodes.png) |
-
----
-
-## 📁 Estructura del proyecto
-omnichannel-ai-scheduler/
-├── README.md # Documentación en inglés
-├── README.ES.md # Documentación en español
-├── LICENSE # Licencia MIT
-├── workflow/
-│ ├── omnichannel-ai-scheduler.json # Workflow principal de n8n (POST)
-│ └── meta-webhook-verification.json # Verificación de webhook (GET)
-├── templates/
-│ ├── Omnichannel AI Scheduler — Medical Clinic.xlsx # Plantilla con datos de ejemplo
-│ ├── Omnichannel_CRM_Enterprise.xlsx # Plantilla vacía
-│ └── build_sheets.py # Generador de plantillas
-├── docs/
-│ ├── .env.example # Ejemplo de variables de entorno
-│ ├── GHL_INTEGRATION.md # Guía de integración con GoHighLevel
-│ └── SECURITY.md # Buenas prácticas de seguridad
-└── assets/
-├── dashboard/ # Capturas del dashboard
-├── conversations/ # Ejemplos WhatsApp, Instagram, Facebook
-├── google_sheets/ # Estructura de Google Sheets
-├── google_calendar/ # Eventos de Google Calendar
-├── ghl/ # Integración con GoHighLevel
-├── email/ # Notificaciones por email
-└── n8n/ # Capturas del workflow en n8n
-
-text
+```
 
 ---
 
