@@ -1,6 +1,6 @@
 # 🏥 Omnichannel AI Scheduler — Aesthetic Clinic
 
-> AI-powered omnichannel appointment scheduling system for aesthetic clinics. Built with n8n, Gemini AI, WhatsApp Business API, Instagram DM, Facebook Messenger, Google Calendar and Google Sheets. Automates bookings, cancellations, rescheduling and human escalation without manual intervention.
+> AI-powered omnichannel appointment scheduling system for aesthetic clinics. Built with n8n, Gemini AI, WhatsApp Business API, Instagram DM, Facebook Messenger, Google Calendar, Google Sheets, Gmail and **GoHighLevel (LeadConnector)**. Automates bookings, cancellations, rescheduling and human escalation without manual intervention.
 
 [![N8N](https://img.shields.io/badge/N8N-Workflow-orange?style=flat-square)](https://n8n.io)
 [![Gemini AI](https://img.shields.io/badge/Gemini-AI-4285F4?style=flat-square&logo=google)](https://ai.google.dev)
@@ -10,6 +10,15 @@
 [![GHL](https://img.shields.io/badge/GoHighLevel-CRM-8A2BE2?style=flat-square)](https://www.gohighlevel.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-22c55e?style=flat-square)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Production_Ready-22c55e?style=flat-square)](https://github.com/alejandro-orbis)
+
+---
+
+## 📚 Documentation
+
+| Language | File |
+|----------|------|
+| English | [README.md](README.md) |
+| Spanish | [README.ES.md](README.ES.md) |
 
 ---
 
