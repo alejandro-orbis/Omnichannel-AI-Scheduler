@@ -49,20 +49,35 @@ Omnichannel appointment management system for aesthetic clinics. Patients can in
 ## 🏗️ Architecture
 
 Webhook (WhatsApp / Instagram / Facebook)
+│
 └── Parse Webhook (normalizes formats)
+│
 └── Rate Limiter (8 msg/minute)
+│
 └── Resolve Cross-Channel Identity (unique patient_id + conversation_id)
+│
 └── Human Takeover IF (human_takeover = TRUE silences bot)
+│
 └── Multi-turn State Machine
+│
 ├── BOOK → Check Calendar availability → Create event
+│
 ├── CANCEL → Cancel Calendar event
+│
 ├── RESCHEDULE → Show new slots → Reschedule
+│
 ├── ESCALATE → Set human_takeover flag + Email staff
+│
 └── RESPOND → Gemini AI classifies intent
+│
 └── Prepare Response → Save context
+│
 ├── Send message (WhatsApp / Instagram / Facebook)
+│
 ├── Save to Sheets (Context, Patients, CRM_Inbox)
+│
 ├── Update Metrics (leads, appointments, escalations)
+│
 └── Sync GHL (contact, opportunity, note)
 
 text
