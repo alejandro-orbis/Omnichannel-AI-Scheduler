@@ -216,7 +216,6 @@ Webhook (WhatsApp / Instagram / Facebook)
 2. Copia el **Sheet ID** de la URL:
 https://docs.google.com/spreadsheets/d/TU_SHEET_ID_AQUI/edit
 
-text
 3. Actualiza el `documentId` en todos los nodos de Google Sheets del workflow
 
 ### 4. Importar workflows a N8N
