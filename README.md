@@ -138,13 +138,14 @@ Webhook (WhatsApp / Instagram / Facebook)
 
 ```
 omnichannel-ai-scheduler/
-├── README.md
+├── README.md (english)     
+├── README.ES.md (spanish)
 ├── LICENSE
 ├── workflow/
-│   ├── omnichannel-scheduler.json
+│   ├── omnichannel-ai-scheduler.json
 │   └── meta-webhook-verification.json
 ├── templates/
-│   ├── Omnichannel AI Scheduler — Aesthetic Clinic.xlsx
+│   ├── Omnichannel AI Scheduler — Medical Clinic.xlsx
 │   ├── Omnichannel_CRM_Enterprise.xlsx
 │   └── build_sheets.py
 ├── docs/
@@ -173,7 +174,7 @@ omnichannel-ai-scheduler/
   - Facebook Messenger Platform
 - Google account (Sheets + Calendar + Gmail)
 - Google AI Studio account (Gemini API key)
-- GoHighLevel / LeadConnector (optional)
+- GoHighLevel / LeadConnector
 
 ### 2. Configure N8N Credentials
 
