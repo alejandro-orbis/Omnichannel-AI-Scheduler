@@ -343,7 +343,7 @@ Los pull requests son bienvenidos. Para cambios importantes, abre primero un iss
 
 - GitHub: [@alejandro-orbis](https://github.com/alejandro-orbis)
 - LinkedIn: [linkedin.com/in/alejandro-orbis](https://linkedin.com/in/alejandro-orbis)
-- Email: [alejandro@orbisautomations.com](mailto:alejandro@orbisautomations.com)
+- Email: [alex_noya@hotmail.com](mailto:alex_noya@hotmail.com)
 
 ---
 
